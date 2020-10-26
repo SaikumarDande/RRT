@@ -238,25 +238,3 @@ while(cnt < 1000):
         cnt += 1
     actual_cnt += 1
 cv2.waitKey(0)
-'''
-#mapimg = map.getMap()
-cnt = 0
-actual_cnt = 0
-while(cnt < 10000):
-    x, y = graph.sample_envir()
-    new_node = Node(x, y)
-    n, new_node, ok = graph.add_node(new_node)
-    if ok:
-        map.drawEdge(n, new_node, True)
-        map.drawNode('N', [new_node.x, new_node.y])
-        if graph.isGoal(new_node):
-            graph.drawPath(new_node)
-            text = str(new_node.distance)
-            cv2.putText(map.MapImg, text, (200, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-            map.refreshMap()
-            break
-        map.refreshMap()
-        cnt += 1
-    actual_cnt += 1
-cv2.waitKey(0)
-'''
