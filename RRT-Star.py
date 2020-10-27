@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import cv2
 import numpy as np
 import random
@@ -101,14 +103,12 @@ class RRTMap:
         cv2.putText(map_animation, text, (200, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)    
         return map_animation
 
-    def crossObstacles(self, n1, n2, goal):
+    def crossObstacles(self, n1, n2):
         x1, y1 = n1.x, n1.y
         x2, y2 = n2.x, n2.y
-        upper = 101
-        if goal:
-            upper = 401
+        upper = 40
         for i in range(0, upper):
-            u = i/(upper-1)
+            u = i/float(upper-1)
             x = int(x1*u + x2*(1-u))
             y = int(y1*u + y2*(1-u))
             r, g, b = self.dummyMap[y, x]
@@ -131,7 +131,7 @@ class RRTGraph:
         self.goalDim = 1
         self.generateGoalNode = 0
         self.goalNode = []
-        self.searchRad = 30
+        self.searchRad = 20
 
         self.vertex = [self.root]
         self.vertex_index_dict = {self.root:0}
@@ -151,7 +151,7 @@ class RRTGraph:
                 lower = [upper[0]+self.obsDim, upper[1]+self.obsDim]
             obs.append(upper)
             obs.append(lower)
-        self.obstacles = obs.copy()
+        self.obstacles = list(obs)
         return obs
     
     def metric(self, n1, n2):
@@ -220,7 +220,7 @@ class RRTGraph:
 
     def rewire(self, newNode_idx, nneigbours):
         for i in nneigbours:
-            if not self.map.crossObstacles(self.vertex[newNode_idx], self.vertex[i], False):
+            if not self.map.crossObstacles(self.vertex[newNode_idx], self.vertex[i]):
                 temp = self.metric(self.vertex[newNode_idx], self.vertex[i])
                 if self.vertex[newNode_idx].distance + temp < self.vertex[i].distance:
                     self.vertex[i].distance = self.vertex[newNode_idx].distance + temp
@@ -232,11 +232,10 @@ class RRTGraph:
     def add_node(self, new_node):
         #Checks whether the current node is free and tries to add the node if no obstacels are there in between
         nnear_index = self.nearest(new_node)
-        is_Goal = self.isGoal(new_node)
-        if not is_Goal:
-            new_node = self.step(self.vertex[nnear_index], new_node)
+        new_node = self.step(self.vertex[nnear_index], new_node)
         nbest, nneighbours = self.nearest_in_rad(new_node, nnear_index)
-        if not self.map.crossObstacles(self.vertex[nbest], new_node, is_Goal):
+        is_Goal = self.isGoal(new_node)
+        if not self.map.crossObstacles(self.vertex[nbest], new_node):
             new_node.parent = self.vertex[nbest]
             self.vertex[nbest].childs.append(new_node)
             new_node.distance = self.vertex[nbest].distance + self.metric(self.vertex[nbest], new_node)
